@@ -12,7 +12,10 @@ wshb_if.slave wb_s
 );
 
 //Address                                                                   
-wire [mem_adr_width-1:0] address = wb_s.adr[mem_adr_width+1:2];              
+logic [mem_adr_width-1:0] address;
+logic address_inc_flag;
+
+assign address = address_inc_flag ?  wb_s.adr[mem_adr_width+1:2] + 1 : wb_s.adr[mem_adr_width+1:2];
 
 // 4 independent memories as suggested   
 logic [7:0] mem0 [0:2**mem_adr_width-1];
@@ -37,11 +40,18 @@ assign wb_s.rty = 0;
 //Read acknowledge(need to be sequential)
 always_ff @(posedge wb_s.clk)
 begin
-      if(wb_s.rst || ack_r)
-            ack_r <= 0;
+      if(wb_s.rst || (ack_r && (wb_s.cti == 3'b111 || wb_s.cti == 3'b000))) 
+            ack_r <= 0;                        //Classic cycle, end of burst 
       else if(!wb_s.we && wb_s.stb)
-            ack_r <= 1;
+            ack_r <= 1;                        //Rest
+      
+      if(!wb_s.we)
+      begin
+            if(wb_s.cti == 3'b010) begin address_inc_flag <= 1; end    
+            else begin address_inc_flag <= 0; end
+      end
 end              
+
 
 always_ff @(posedge wb_s.clk)
 begin
