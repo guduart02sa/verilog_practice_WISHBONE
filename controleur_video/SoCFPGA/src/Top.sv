@@ -74,6 +74,67 @@ assign wshb_if_sdram.bte = '0 ;
 //------- Code Eleves ------
 //--------------------------
 
+logic [31:0] counter, counter1;
+logic pixel_rst, D0,D1,Q0;
 
+`ifdef SIMULATION
+  localparam hcmpt = 50;
+  localparam hcmpt_pixel_clk = 16;
+`else
+  localparam hcmpt = 50000000;
+  localparam hcmpt_pixel_clk = 16000000;
+`endif
+
+assign LED[0] = KEY[0];
+
+always_ff @(posedge sys_clk or posedge sys_rst)
+begin
+    if (sys_rst) 
+    begin
+        counter <= 0;
+        LED[1] <= 0;
+    end
+    else 
+    begin
+        if (counter == hcmpt) 
+        begin
+            counter <= 0;
+            LED[1] <= ~LED[1];
+        end 
+        else 
+        begin
+            counter <= counter + 1;
+        end
+    end
+end
+
+assign D1 = Q0;
+assign D0 = 0;
+always_ff @(posedge sys_rst or posedge pixel_clk) 
+begin
+    Q0 <= (sys_rst) ? 1 : D0;
+    pixel_rst <= (sys_rst) ? 1 : D1;
+end
+
+always_ff @(posedge pixel_clk or posedge pixel_rst)
+begin
+    if (pixel_rst) 
+    begin
+        counter1 <= 0;
+        LED[2] <= 0;
+    end
+    else 
+    begin
+        if (counter1 == hcmpt_pixel_clk) 
+        begin
+            counter1 <= 0;
+            LED[2] <= ~LED[2];
+        end 
+        else 
+        begin
+            counter1 <= counter1 + 1;
+        end
+    end
+end
 
 endmodule
