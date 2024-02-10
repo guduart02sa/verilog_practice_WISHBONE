@@ -56,10 +56,8 @@ begin
     video_ifm.BLANK <= ((counterlines >= VBP + VPULSE + VFP) && (counterpixels >= HBP + HPULSE + HFP));
 end
 
-////////////////////////// NEW CODE part 3 //////////////////////////
 
 // Wishbone interface
-assign wshb_ifm.cyc = 1'b1;
 assign wshb_ifm.sel = 4'b1111;
 assign wshb_ifm.we = 1'b0;
 assign wshb_ifm.cti = '0;
@@ -126,5 +124,8 @@ end
 assign aux_read = video_ifm.BLANK && fifo_full_1st_time && !aux_rempty;
 assign video_ifm.RGB = aux_rdata[23:0];
 
+////////////////////////// NEW CODE part 4 //////////////////////////
+
+assign wshb_ifm.cyc = wshb_ifm.stb;
 
 endmodule

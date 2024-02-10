@@ -139,12 +139,28 @@ begin
     end
 end
 
+//==========================New code part 4===========================//
+
+wshb_if #(.DATA_BYTES(4)) wshb_if_vga (sys_clk, sys_rst);
+wshb_if #(.DATA_BYTES(4)) wshb_if_mire (sys_clk, sys_rst);
+
 vga #(.HDISP(HDISP), .VDISP(VDISP)) 
 vga_module (
     .pixel_clk(pixel_clk),
     .pixel_rst(pixel_rst),
     .video_ifm(video_ifm),
-    .wshb_ifm(wshb_if_sdram)
+    .wshb_ifm(wshb_if_vga)
+);
+
+Mire #(.HDISP(HDISP), .VDISP(VDISP))
+mire0 (
+    .wshb_ifm(wshb_if_mire)
+);
+
+wshb_intercon wshb_intercon_module (
+    .wshb_ifs_mire(wshb_if_mire),
+    .wshb_ifm(wshb_if_sdram.master),
+    .wshb_ifs_vga(wshb_if_vga)
 );
 
 endmodule
