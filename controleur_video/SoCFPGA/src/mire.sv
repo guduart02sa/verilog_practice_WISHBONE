@@ -77,7 +77,7 @@ begin
             end
             else
             begin
-                wshb_ifm.adr <= wshb_ifm.adr + 4;  //Word increment "Les pixels sont stockés par mots de 32bits"
+                wshb_ifm.adr <= wshb_ifm.adr + 4;  
             end
         end
     end

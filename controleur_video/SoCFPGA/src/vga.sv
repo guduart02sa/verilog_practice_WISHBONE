@@ -68,8 +68,8 @@ assign wshb_ifm.bte = '0;
 logic aux_read, aux_rempty,aux_wfull,aux_almost_full;
 logic [DATA_WIDTH - 1 : 0] aux_rdata;
 
-// Almost full threshold as 255 because it's the default value
-async_fifo #(.DATA_WIDTH(DATA_WIDTH), .DEPTH_WIDTH(8), .ALMOST_FULL_THRESHOLD(255)) async_fifo0
+// Almost full threshold as 224 (256-32)
+async_fifo #(.DATA_WIDTH(DATA_WIDTH), .DEPTH_WIDTH(8), .ALMOST_FULL_THRESHOLD(224)) async_fifo0
 (
     .rst(wshb_ifm.rst),
     .rclk(pixel_clk),
@@ -83,7 +83,7 @@ async_fifo #(.DATA_WIDTH(DATA_WIDTH), .DEPTH_WIDTH(8), .ALMOST_FULL_THRESHOLD(25
     .walmost_full(aux_almost_full)
 );
 
-assign wshb_ifm.stb = !aux_wfull;         // While the fifo is not full, ask data 
+//assign wshb_ifm.stb = !aux_wfull;         // While the fifo is not full, ask data 
 
 //SDRAM READING
 always_ff @(posedge wshb_ifm.clk)
@@ -124,8 +124,19 @@ end
 assign aux_read = video_ifm.BLANK && fifo_full_1st_time && !aux_rempty;
 assign video_ifm.RGB = aux_rdata[23:0];
 
-////////////////////////// NEW CODE part 4 //////////////////////////
+////////////////////////// NEW CODE part 5 //////////////////////////
+logic aux_cyc;
+//assign wshb_ifm.cyc = wshb_ifm.stb;
+assign wshb_ifm.stb = !aux_wfull;
 
-assign wshb_ifm.cyc = wshb_ifm.stb;
+always_ff @(posedge wshb_ifm.clk or posedge wshb_ifm.rst)
+begin
+    if (wshb_ifm.rst)
+    begin
+        wshb_ifm.cyc <= 0;
+    end
+    else if(aux_wfull) begin wshb_ifm.cyc <= 0; end
+    else if(!aux_almost_full) begin wshb_ifm.cyc <= 1; end
+end
 
 endmodule

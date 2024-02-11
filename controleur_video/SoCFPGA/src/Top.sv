@@ -48,34 +48,6 @@ hw_support hw_support_inst (
     .KEY      ( KEY )
  );
 
-//=============================
-// On neutralise l'interface
-// du flux video pour l'instant
-// A SUPPRIMER PLUS TARD
-//=============================
-assign wshb_if_stream.ack = 1'b1;
-assign wshb_if_stream.dat_sm = '0 ;
-assign wshb_if_stream.err =  1'b0 ;
-assign wshb_if_stream.rty =  1'b0 ;
-
-//=============================
-// On neutralise l'interface SDRAM
-// pour l'instant
-// A SUPPRIMER PLUS TARD
-//=============================
-//assign wshb_if_sdram.stb  = 1'b0;
-//assign wshb_if_sdram.cyc  = 1'b0;
-//assign wshb_if_sdram.we   = 1'b0;
-//assign wshb_if_sdram.adr  = '0  ;
-//assign wshb_if_sdram.dat_ms = '0 ;
-//assign wshb_if_sdram.sel = '0 ;
-//assign wshb_if_sdram.cti = '0 ;
-//assign wshb_if_sdram.bte = '0 ;
-
-//--------------------------
-//------- Code Eleves ------
-//--------------------------
-
 logic [31:0] counter, counter1;
 logic pixel_rst, D0,D1,Q0;
 
@@ -139,10 +111,7 @@ begin
     end
 end
 
-//==========================New code part 4===========================//
-
 wshb_if #(.DATA_BYTES(4)) wshb_if_vga (sys_clk, sys_rst);
-wshb_if #(.DATA_BYTES(4)) wshb_if_mire (sys_clk, sys_rst);
 
 vga #(.HDISP(HDISP), .VDISP(VDISP)) 
 vga_module (
@@ -152,13 +121,8 @@ vga_module (
     .wshb_ifm(wshb_if_vga)
 );
 
-Mire #(.HDISP(HDISP), .VDISP(VDISP))
-mire0 (
-    .wshb_ifm(wshb_if_mire)
-);
-
 wshb_intercon wshb_intercon_module (
-    .wshb_ifs_mire(wshb_if_mire),
+    .wshb_ifs_mire(wshb_if_stream),
     .wshb_ifm(wshb_if_sdram.master),
     .wshb_ifs_vga(wshb_if_vga)
 );
